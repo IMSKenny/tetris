@@ -99,15 +99,15 @@ context.fillStyle = "#000";
 //          context.strokeRect ( 0,  canvas.height-200,  300, 200 );
 
 // обновление значения очков на экране
-function updateScore() {
-  const scoreElement = document.getElementById('score');
-  scoreElement.textContent = `Очки: ${score}`;
-}
+// function updateScore() {
+//   const scoreElement = document.getElementById('score');
+//   scoreElement.textContent = `Очки: ${score}`;
+// }
 
 // подсчет очков
 function increaseScore(points) {
   score += points;
-  updateScore();
+  // updateScore();
 }
 
 function createTetromino() {
