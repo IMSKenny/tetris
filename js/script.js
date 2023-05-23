@@ -5,8 +5,10 @@ const ROWS = 30;
 const COLS = 15;
 let lastTime = 0;
 let dropInterval = 1000; // интервал времени между падениями фигур в миллисекундах
-
-// Создаем переменные для отслеживания состояния клавиш
+// Инициализация переменной с очками
+let score = 0;
+let points = 10;
+// переменные для отслеживания состояния клавиш
 let keyState = {};
 let isKeyPressed = false;
 
@@ -62,12 +64,45 @@ const tetrominoX = [
     [0, 4, 0, 0],
     [0, 0, 0, 0],
   ],
+
+  [
+    [0, 5, 0, 0],
+    [0, 5, 5, 0],
+    [0, 0, 5, 0],
+    [0, 0, 0, 0],
+  ],
+  
+  // [
+  //   [6, 0, 0, 6],
+  //   [6, 0, 0, 6],
+  //   [6, 0, 0, 6],
+  //   [6, 6, 6, 6],
+  // ],
+  
+  // [
+  //   [0, 7, 0, 0],
+  //   [0, 7, 0, 0],
+  //   [7, 7, 7, 0],
+  //   [7, 7, 7, 0],
+  // ],
 ];
 const canvas = document.getElementById("gameCanvas");
 const context = canvas.getContext("2d");
 let tetrominoFigur;
 context.fillStyle = "#000";
 context.fillRect(0, 0, canvas.width, canvas.height);
+
+// обновление значения очков на экране
+function updateScore() {
+  const scoreElement = document.getElementById('score');
+  scoreElement.textContent = `Очки: ${score}`;
+}
+
+// подсчет очков
+function increaseScore(points) {
+  score += points;
+  updateScore();
+}
 
 function createTetromino() {
   tetrominoFigur = tetrominoX[Math.floor(Math.random() * tetrominoX.length)];
@@ -77,13 +112,17 @@ function drawTetromino(tetromino, x, y, context) {
   tetromino.forEach((row, rowIndex) => {
     row.forEach((value, colIndex) => {
       if (value > 0) {
-        context.fillStyle = colors[value];
+         context.fillStyle = colors[value];
+         context.strokeStyle = colors[value]+100;
 
         // Определяем координаты блока на холсте
         const xPos = (x + colIndex) * blockSize;
         const yPos = (y + rowIndex) * blockSize;
         // Отображаем блок на холсте
         context.fillRect(xPos, yPos, blockSize, blockSize);
+        context.strokeRect(xPos, yPos, blockSize, blockSize); 
+
+        
       }
     });
   });
@@ -95,12 +134,14 @@ function drawGrid() {
       let color = grid[row][col];
       if (color !== 0) {
         context.fillStyle = colors[color];
+        // context.strokeStyle = colors[value]+100;
         context.fillRect(
           col * blockSize,
           row * blockSize,
           blockSize,
           blockSize
         );
+         context.strokeRect(col * blockSize, row * blockSize, blockSize, blockSize); 
       }
     }
   }
@@ -130,6 +171,7 @@ let i = 0;
 
       // Удаление заполненной строки из массива
       grid.splice(row+i, 1);
+      increaseScore(points);
       // Добавление новой пустой строки в начало массива
       grid.unshift(Array(COLS).fill(0));
       i++;
@@ -326,6 +368,39 @@ function handleKeyUp(event) {
 document.addEventListener("keydown", handleKeyDown);
 document.addEventListener("keyup", handleKeyUp);
 
+// Добавление слушателей событий свайпов
+canvas.addEventListener('touchstart', event => {
+  const touch = event.touches[0];
+  const startX = touch.clientX;
+  const startY = touch.clientY;
+
+  canvas.addEventListener('touchmove', moveEvent => {
+    const touch = moveEvent.touches[0];
+    const deltaX = touch.clientX - startX;
+    const deltaY = touch.clientY - startY;
+
+    if (Math.abs(deltaX) > Math.abs(deltaY)) {
+      if (deltaX > 0) {
+        tetromino.move(1);
+      } else {
+        tetromino.move(-1);
+      }
+    } else {
+      if (deltaY > 0) {
+        tetromino.moveDown();
+      } else {
+        tetromino.rotate();
+      }
+    }
+
+    moveEvent.preventDefault();
+  });
+
+  canvas.addEventListener('touchend', () => {
+    canvas.removeEventListener('touchmove');
+  });
+});
+
 // document.addEventListener("keydown", (event) => {
 //   if (event.code in keys) {
 //     event.preventDefault();
@@ -359,8 +434,10 @@ function update(time = 0) {
   }
 
   if (tetromino.collides()) {
+    
     let gameOver = tetromino.lock();
     if (gameOver) {
+      
       createTetromino();
       tetromino = new Tetromino(tetrominoFigur);
     } else {
@@ -380,7 +457,7 @@ function update(time = 0) {
 
   // Проверяем состояние клавиши и обновляем позицию фигуры только один раз при каждом нажатии
   if (isKeyPressed) {
-    // Обновление позиции фигуры, например:
+    // Обновление позиции фигуры:
     if (keyState.ArrowLeft) {
       tetromino.move(-1);
     }
@@ -393,10 +470,16 @@ function update(time = 0) {
     }
     if (keyState.ArrowDown) {
       tetromino.moveDown();
-    }
-
+      if (tetromino.collides()) {
+        isKeyPressed = false;
+      }
+    } else {
     isKeyPressed = false;
+    }
+    
   }
+  
+  
 
   //Запрос следующего кадра анимации
   requestAnimationFrame(update);
