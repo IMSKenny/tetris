@@ -161,7 +161,7 @@ function drawGrid() {
          context.fillText("Down", 125, 500);
          context.fillText("Rotate", 125, 100);
          context.font = "24px Ariel";
-         context.fillText(`${score}`, 140, 50);
+         context.fillText(`${score}`, 20, 50);
       }
     }
   }
