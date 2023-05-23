@@ -156,10 +156,12 @@ function drawGrid() {
          context.strokeRect( 0,  0,  300,  200 );
          context.strokeRect ( 0,  canvas.height-200,  300, 200 );
          context.fillStyle = 'gray';
-         context.fillText("Left", 70, 300);
-         context.fillText("Right", 220, 300);
-         context.fillText("Down", 135, 500);
-         context.fillText("Rotate", 135, 100);
+         context.fillText("Left", 60, 300);
+         context.fillText("Right", 210, 300);
+         context.fillText("Down", 125, 500);
+         context.fillText("Rotate", 125, 100);
+         context.font = "24px Ariel";
+         context.fillText(`${score}`, 140, 50);
       }
     }
   }
