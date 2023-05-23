@@ -368,38 +368,106 @@ function handleKeyUp(event) {
 document.addEventListener("keydown", handleKeyDown);
 document.addEventListener("keyup", handleKeyUp);
 
-// Добавление слушателей событий свайпов
-canvas.addEventListener('touchstart', event => {
+
+
+// Определение областей для управления на смартфоне
+const leftButton = { x: 0, y: canvas.height - 400, width: 150, height: 200 };
+const rightButton = { x: 150, y: canvas.height - 400, width: 150, height: 200 };
+const rotateButton = { x: 0, y: 0, width: 300, height: 200 };
+const downButton = { x: 0, y: canvas.height-200, width: 300, height: 200 };
+ // Переменные для отслеживания долгого нажатия
+ let isTouching = false;
+ let intervalId = null;
+
+// Обработчик события касания
+canvas.addEventListener('touchstart', function(event) {
   const touch = event.touches[0];
-  const startX = touch.clientX;
-  const startY = touch.clientY;
+  const touchX = touch.pageX - canvas.offsetLeft;
+  const touchY = touch.pageY - canvas.offsetTop;
 
-  canvas.addEventListener('touchmove', moveEvent => {
-    const touch = moveEvent.touches[0];
-    const deltaX = touch.clientX - startX;
-    const deltaY = touch.clientY - startY;
+  // Проверка, в какую область коснулся пользователь
+  if (isInside(touchX, touchY, leftButton)) {
+    // Выполните необходимое действие при касании на кнопку "Влево"
+    tetromino.move(-1);
+    isTouching = true;
+    // Выполнение действия при начале долгого нажатия
+    intervalId = setInterval(function() {
+      // Выполните необходимое действие при долгом нажатии вниз
+      tetromino.move(-1);
+    }, 100); // Измените интервал, чтобы управлять скоростью падения
 
-    if (Math.abs(deltaX) > Math.abs(deltaY)) {
-      if (deltaX > 0) {
-        tetromino.move(1);
-      } else {
-        tetromino.move(-1);
-      }
-    } else {
-      if (deltaY > 0) {
-        tetromino.moveDown();
-      } else {
-        tetromino.rotate();
-      }
-    }
+  } else if (isInside(touchX, touchY, rightButton)) {
+    // Выполните необходимое действие при касании на кнопку "Вправо"
+    tetromino.move(1);
+    isTouching = true;
+    // Выполнение действия при начале долгого нажатия
+    intervalId = setInterval(function() {
+      // Выполните необходимое действие при долгом нажатии вниз
+      tetromino.move(1);
+    }, 100); // Измените интервал, чтобы управлять скоростью падения
 
-    moveEvent.preventDefault();
-  });
+  } else if (isInside(touchX, touchY, rotateButton)) {
+    // Выполните необходимое действие при касании на кнопку "Поворот"
+    tetromino.rotate();
 
-  canvas.addEventListener('touchend', () => {
-    canvas.removeEventListener('touchmove');
-  });
+  }
+  else if (isInside(touchX, touchY, downButton)) {
+    // Выполните необходимое действие при касании на кнопку "вниз"
+    tetromino.moveDown();
+    isTouching = true;
+    // Выполнение действия при начале долгого нажатия
+    intervalId = setInterval(function() {
+      // Выполните необходимое действие при долгом нажатии вниз
+      tetromino.moveDown();
+    }, 100); // Измените интервал, чтобы управлять скоростью падения
+
+  }
 });
+
+canvas.addEventListener('touchend', function(event) {
+  // Сброс флага нажатия и очистка интервала
+  isTouching = false;
+  clearInterval(intervalId);
+});
+
+// Функция для проверки, находится ли точка внутри прямоугольной области
+function isInside(x, y, rect) {
+  return x >= rect.x && x <= rect.x + rect.width &&
+         y >= rect.y && y <= rect.y + rect.height;
+}
+
+// // Добавление слушателей событий свайпов
+// canvas.addEventListener('touchstart', event => {
+//   const touch = event.touches[0];
+//   const startX = touch.clientX;
+//   const startY = touch.clientY;
+
+//   canvas.addEventListener('touchmove', moveEvent => {
+//     const touch = moveEvent.touches[0];
+//     const deltaX = touch.clientX - startX;
+//     const deltaY = touch.clientY - startY;
+
+//     if (Math.abs(deltaX) > Math.abs(deltaY)) {
+//       if (deltaX > 0) {
+//         tetromino.move(1);
+//       } else {
+//         tetromino.move(-1);
+//       }
+//     } else {
+//       if (deltaY > 0) {
+//         tetromino.moveDown();
+//       } else {
+//         tetromino.rotate();
+//       }
+//     }
+
+//     moveEvent.preventDefault();
+//   });
+
+//   canvas.addEventListener('touchend', () => {
+//     canvas.removeEventListener('touchmove');
+//   });
+// });
 
 // document.addEventListener("keydown", (event) => {
 //   if (event.code in keys) {
