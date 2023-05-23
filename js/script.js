@@ -90,7 +90,13 @@ const canvas = document.getElementById("gameCanvas");
 const context = canvas.getContext("2d");
 let tetrominoFigur;
 context.fillStyle = "#000";
-context.fillRect(0, 0, canvas.width, canvas.height);
+ context.strokeStyle = 'gray';
+ 
+// context.strokeRect(0, blockSize*4, blockSize*4, canvas.width);
+// context.strokeRect (0, canvas.height - 400, 150, 200 );
+//          context.strokeRect(150,  canvas.height - 400,  150, 200 )
+//          context.strokeRect( 0,  0,  300,  200 );
+//          context.strokeRect ( 0,  canvas.height-200,  300, 200 );
 
 // обновление значения очков на экране
 function updateScore() {
@@ -134,14 +140,26 @@ function drawGrid() {
       let color = grid[row][col];
       if (color !== 0) {
         context.fillStyle = colors[color];
-        // context.strokeStyle = colors[value]+100;
+        //  context.strokeStyle = colors[value]+100;
         context.fillRect(
           col * blockSize,
           row * blockSize,
           blockSize,
           blockSize
         );
+        context.strokeStyle = 'red';
+        context.strokeRect(0, 0, canvas.width, blockSize*4);
+        context.strokeStyle = 'gray';
          context.strokeRect(col * blockSize, row * blockSize, blockSize, blockSize); 
+         context.strokeRect (0, canvas.height - 400, 150, 200 );
+         context.strokeRect(150,  canvas.height - 400,  150, 200 )
+         context.strokeRect( 0,  0,  300,  200 );
+         context.strokeRect ( 0,  canvas.height-200,  300, 200 );
+         context.fillStyle = 'gray';
+         context.fillText("Left", 70, 300);
+         context.fillText("Right", 220, 300);
+         context.fillText("Down", 135, 500);
+         context.fillText("Rotate", 135, 100);
       }
     }
   }
