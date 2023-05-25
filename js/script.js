@@ -1,14 +1,17 @@
+import increaseScore from "./score.js";
+
 // Определяем размер блока
 const blockSize = 20;
 // Определение игрового поля
 const ROWS = 30;
 const COLS = 15;
 let lastTime = 0;
-let dropInterval = 1000; // интервал времени между падениями фигур в миллисекундах
-// Инициализация переменной с очками
+// Интервал времени между падениями фигур в миллисекундах
+let dropInterval = 1000;
+
+// Счет
 let score = 0;
-let points = 10;
-// переменные для отслеживания состояния клавиш
+// Переменные для отслеживания состояния клавиш
 let keyState = {};
 let isKeyPressed = false;
 
@@ -17,8 +20,14 @@ const grid = [];
 for (let row = 0; row < ROWS; row++) {
   grid[row] = new Array(COLS).fill(0);
 }
-console.log(grid);
 
+// Отрисованное поле
+let alreadyGrid = [];
+for (let row = 0; row < ROWS; row++) {
+  alreadyGrid[row] = new Array(COLS).fill(999);
+}
+
+// Массив с базовыми цветами
 const colors = [
   null,
   "#FF0D72",
@@ -36,6 +45,7 @@ const keys = {
   ArrowDown: false,
 };
 
+// Массив с матрицами фигур
 const tetrominoX = [
   [
     [0, 0, 0, 0],
@@ -71,14 +81,14 @@ const tetrominoX = [
     [0, 0, 5, 0],
     [0, 0, 0, 0],
   ],
-  
+
   // [
   //   [6, 0, 0, 6],
   //   [6, 0, 0, 6],
   //   [6, 0, 0, 6],
   //   [6, 6, 6, 6],
   // ],
-  
+
   // [
   //   [0, 7, 0, 0],
   //   [0, 7, 0, 0],
@@ -86,116 +96,116 @@ const tetrominoX = [
   //   [7, 7, 7, 0],
   // ],
 ];
+
 const canvas = document.getElementById("gameCanvas");
 const context = canvas.getContext("2d");
-let tetrominoFigur;
+// Случайная фигура
+let tetrominoRandom;
 context.fillStyle = "#000";
- context.strokeStyle = 'gray';
- 
-// context.strokeRect(0, blockSize*4, blockSize*4, canvas.width);
-// context.strokeRect (0, canvas.height - 400, 150, 200 );
-//          context.strokeRect(150,  canvas.height - 400,  150, 200 )
-//          context.strokeRect( 0,  0,  300,  200 );
-//          context.strokeRect ( 0,  canvas.height-200,  300, 200 );
+context.strokeStyle = "gray";
 
-// обновление значения очков на экране
-// function updateScore() {
-//   const scoreElement = document.getElementById('score');
-//   scoreElement.textContent = `Очки: ${score}`;
-// }
-
-// подсчет очков
-function increaseScore(points) {
-  score += points;
-  // updateScore();
-}
-
+// Выбор случайной фигуры
 function createTetromino() {
-  tetrominoFigur = tetrominoX[Math.floor(Math.random() * tetrominoX.length)];
+  tetrominoRandom = tetrominoX[Math.floor(Math.random() * tetrominoX.length)];
 }
 
+// Отрисовка фигуры
 function drawTetromino(tetromino, x, y, context) {
   tetromino.forEach((row, rowIndex) => {
     row.forEach((value, colIndex) => {
       if (value > 0) {
-         context.fillStyle = colors[value];
-         context.strokeStyle = colors[value]+100;
+        context.fillStyle = colors[value];
+        context.strokeStyle = colors[value] + 100;
 
         // Определяем координаты блока на холсте
         const xPos = (x + colIndex) * blockSize;
         const yPos = (y + rowIndex) * blockSize;
         // Отображаем блок на холсте
         context.fillRect(xPos, yPos, blockSize, blockSize);
-        context.strokeRect(xPos, yPos, blockSize, blockSize); 
-
-        
+        context.strokeRect(xPos, yPos, blockSize, blockSize);
       }
     });
   });
 }
 
+// Отрисовка поля
 function drawGrid() {
-  for (let row = 0; row < ROWS; row++) {
-    for (let col = 0; col < COLS; col++) {
-      let color = grid[row][col];
-      if (color !== 0) {
-        context.fillStyle = colors[color];
-        //  context.strokeStyle = colors[value]+100;
-        context.fillRect(
-          col * blockSize,
-          row * blockSize,
-          blockSize,
-          blockSize
-        );
-        context.strokeStyle = 'red';
-        context.strokeRect(0, 0, canvas.width, blockSize*4);
-        context.strokeStyle = 'gray';
-         context.strokeRect(col * blockSize, row * blockSize, blockSize, blockSize); 
-         context.strokeRect (0, canvas.height - 400, 150, 200 );
-         context.strokeRect(150,  canvas.height - 400,  150, 200 )
-         context.strokeRect( 0,  0,  300,  200 );
-         context.strokeRect ( 0,  canvas.height-200,  300, 200 );
-         context.fillStyle = 'gray';
-         context.fillText("Left", 60, 300);
-         context.fillText("Right", 210, 300);
-         context.fillText("Down", 125, 500);
-         context.fillText("Rotate", 125, 100);
-         context.font = "24px Ariel";
-         context.fillText(`${score}`, 20, 50);
+  context.strokeStyle = "red";
+  context.strokeRect(0, 0, canvas.width, blockSize * 4);
+  context.strokeStyle = "gray";
+  context.strokeRect(0, canvas.height - 400, 150, 200);
+  context.strokeRect(150, canvas.height - 400, 150, 200);
+  context.strokeRect(0, 0, 300, 200);
+  context.strokeRect(0, canvas.height - 200, 300, 200);
+  context.fillStyle = "gray";
+  context.font = "24px Ariel";
+  context.fillText("Left", 60, 300);
+  context.fillText("Right", 210, 300);
+  context.fillText("Down", 125, 500);
+  context.fillText("Rotate", 125, 100);
+
+  context.fillText(`${score}`, 20, 50);
+
+  if (grid !== alreadyGrid) {
+    for (let row = 0; row < ROWS; row++) {
+      for (let col = 0; col < COLS; col++) {
+        let color = grid[row][col];
+        
+        
+        if (color !== 0 ) {
+          console.log("111111111111111111111111111111111111111");
+
+          context.fillStyle = colors[color];
+          // context.strokeStyle = colors[value]+100;
+          context.fillRect(
+            col * blockSize,
+            row * blockSize,
+            blockSize,
+            blockSize
+          );
+
+          context.strokeStyle = "gray";
+          context.strokeRect(
+            col * blockSize,
+            row * blockSize,
+            blockSize,
+            blockSize
+          );
+          //alreadyGrid[row][col] = grid[row][col];
+        }
       }
     }
   }
+   //alreadyGrid = grid;
 }
 
 function clearRows() {
   const filledRows = [];
-  
-    // Проверяем каждую строку на заполненность
-    for (let row = ROWS - 1; row >= 0; row--) {
-      let isRowFilled = true;
-      for (let col = 0; col < COLS; col++) {
-        if (!grid[row][col]) {
-          isRowFilled = false;
-          break;
-        }
-      }
-      if (isRowFilled) {
-        filledRows.push(row);
-      }
-    }
-    console.log(filledRows);
-let i = 0;
-    // Удаляем все заполненные строки
-    for (const row of filledRows) {
-      console.log(filledRows);
 
-      // Удаление заполненной строки из массива
-      grid.splice(row+i, 1);
-      increaseScore(points);
-      // Добавление новой пустой строки в начало массива
-      grid.unshift(Array(COLS).fill(0));
-      i++;
+  // Проверяем каждую строку на заполненность
+  for (let row = ROWS - 1; row >= 0; row--) {
+    let isRowFilled = true;
+    for (let col = 0; col < COLS; col++) {
+      if (!grid[row][col]) {
+        isRowFilled = false;
+        break;
+      }
     }
+    if (isRowFilled) {
+      filledRows.push(row);
+    }
+  }
+
+  let i = 0;
+  // Удаляем все заполненные строки
+  for (const row of filledRows) {
+    // Удаление заполненной строки из массива
+    grid.splice(row + i, 1);
+    score = increaseScore();
+    // Добавление новой пустой строки в начало массива
+    grid.unshift(Array(COLS).fill(0));
+    i++;
+  }
 }
 
 class Tetromino {
@@ -366,11 +376,18 @@ class Tetromino {
   }
 }
 
+/*************************************************************************** */
+/*************************************************************************** */
+/*Управление                                                                 */
+/*************************************************************************** */
+/*************************************************************************** */
+
 // Функция для обработки нажатия клавиши
 function handleKeyDown(event) {
   // Проверяем, что клавиша еще не нажата
   if (!keyState[event.key]) {
     keyState[event.key] = true;
+
     isKeyPressed = true;
 
     // Здесь можно обновить позицию фигуры, например:
@@ -388,19 +405,17 @@ function handleKeyUp(event) {
 document.addEventListener("keydown", handleKeyDown);
 document.addEventListener("keyup", handleKeyUp);
 
-
-
 // Определение областей для управления на смартфоне
 const leftButton = { x: 0, y: canvas.height - 400, width: 150, height: 200 };
 const rightButton = { x: 150, y: canvas.height - 400, width: 150, height: 200 };
 const rotateButton = { x: 0, y: 0, width: 300, height: 200 };
-const downButton = { x: 0, y: canvas.height-200, width: 300, height: 200 };
- // Переменные для отслеживания долгого нажатия
- let isTouching = false;
- let intervalId = null;
+const downButton = { x: 0, y: canvas.height - 200, width: 300, height: 200 };
+// Переменные для отслеживания долгого нажатия
+let isTouching = false;
+let intervalId = null;
 
 // Обработчик события касания
-canvas.addEventListener('touchstart', function(event) {
+canvas.addEventListener("touchstart", function (event) {
   const touch = event.touches[0];
   const touchX = touch.pageX - canvas.offsetLeft;
   const touchY = touch.pageY - canvas.offsetTop;
@@ -411,40 +426,35 @@ canvas.addEventListener('touchstart', function(event) {
     tetromino.move(-1);
     isTouching = true;
     // Выполнение действия при начале долгого нажатия
-    intervalId = setInterval(function() {
+    intervalId = setInterval(function () {
       // Выполните необходимое действие при долгом нажатии вниз
       tetromino.move(-1);
     }, 100); // Измените интервал, чтобы управлять скоростью падения
-
   } else if (isInside(touchX, touchY, rightButton)) {
     // Выполните необходимое действие при касании на кнопку "Вправо"
     tetromino.move(1);
     isTouching = true;
     // Выполнение действия при начале долгого нажатия
-    intervalId = setInterval(function() {
+    intervalId = setInterval(function () {
       // Выполните необходимое действие при долгом нажатии вниз
       tetromino.move(1);
     }, 100); // Измените интервал, чтобы управлять скоростью падения
-
   } else if (isInside(touchX, touchY, rotateButton)) {
     // Выполните необходимое действие при касании на кнопку "Поворот"
     tetromino.rotate();
-
-  }
-  else if (isInside(touchX, touchY, downButton)) {
+  } else if (isInside(touchX, touchY, downButton)) {
     // Выполните необходимое действие при касании на кнопку "вниз"
     tetromino.moveDown();
     isTouching = true;
     // Выполнение действия при начале долгого нажатия
-    intervalId = setInterval(function() {
+    intervalId = setInterval(function () {
       // Выполните необходимое действие при долгом нажатии вниз
       tetromino.moveDown();
     }, 100); // Измените интервал, чтобы управлять скоростью падения
-
   }
 });
 
-canvas.addEventListener('touchend', function(event) {
+canvas.addEventListener("touchend", function (event) {
   // Сброс флага нажатия и очистка интервала
   isTouching = false;
   clearInterval(intervalId);
@@ -452,132 +462,107 @@ canvas.addEventListener('touchend', function(event) {
 
 // Функция для проверки, находится ли точка внутри прямоугольной области
 function isInside(x, y, rect) {
-  return x >= rect.x && x <= rect.x + rect.width &&
-         y >= rect.y && y <= rect.y + rect.height;
+  return (
+    x >= rect.x &&
+    x <= rect.x + rect.width &&
+    y >= rect.y &&
+    y <= rect.y + rect.height
+  );
 }
 
-// // Добавление слушателей событий свайпов
-// canvas.addEventListener('touchstart', event => {
-//   const touch = event.touches[0];
-//   const startX = touch.clientX;
-//   const startY = touch.clientY;
+/*********************************************************************************** */
+/*************************************************************************************/
+/*цикл игры                                                                          */
+/*********************************************************************************** */
+/*********************************************************************************** */
 
-//   canvas.addEventListener('touchmove', moveEvent => {
-//     const touch = moveEvent.touches[0];
-//     const deltaX = touch.clientX - startX;
-//     const deltaY = touch.clientY - startY;
-
-//     if (Math.abs(deltaX) > Math.abs(deltaY)) {
-//       if (deltaX > 0) {
-//         tetromino.move(1);
-//       } else {
-//         tetromino.move(-1);
-//       }
-//     } else {
-//       if (deltaY > 0) {
-//         tetromino.moveDown();
-//       } else {
-//         tetromino.rotate();
-//       }
-//     }
-
-//     moveEvent.preventDefault();
-//   });
-
-//   canvas.addEventListener('touchend', () => {
-//     canvas.removeEventListener('touchmove');
-//   });
-// });
-
-// document.addEventListener("keydown", (event) => {
-//   if (event.code in keys) {
-//     event.preventDefault();
-//     keys[event.code] = true;
-//   }
-// });
-
-// document.addEventListener("keyup", (event) => {
-//   if (event.code in keys) {
-//     event.preventDefault();
-//     keys[event.code] = false;
-//   }
-// });
+function moveDown() {
+  // двигаем текущую фигурку вниз
+  tetromino.y++;
+  // обновляем поле
+  update();
+}
 
 function update(time = 0) {
-  // Обновление состояния игры
+  // Проверяем состояние клавиши и обновляем позицию фигуры только один раз при каждом нажатии
+  if (isKeyPressed) {
+    // Обновление позиции фигуры:
+    if (keyState.ArrowLeft) {
+      tetromino.move(-1);
+      context.fillStyle = "#000";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  drawGrid();
+    }
+
+    if (keyState.ArrowRight) {
+      tetromino.move(+1);
+      context.fillStyle = "#000";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  drawGrid();
+    }
+    if (keyState.ArrowUp) {
+      tetromino.rotate();
+      context.fillStyle = "#000";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  drawGrid();
+    }
+    if (keyState.ArrowDown) {
+      tetromino.moveDown();
+      context.fillStyle = "#000";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  drawGrid();
+      if (tetromino.collides()) {
+        isKeyPressed = false;
+      }
+    } else {
+      isKeyPressed = false;
+    }
+  }
+  if (tetromino.collides()) {
+    
+    if (tetromino.lock()) {
+      
+      createTetromino();
+      tetromino = new Tetromino(tetrominoRandom);
+      
+    } else {
+      console.log(tetromino.grid);
+      console.log("999999999999999999999999999999999999999999999999999999999");
+
+      return false;
+    }
+  }
 
   const deltaTime = time - lastTime;
 
   // Проверяем, прошло ли достаточно времени для падения фигуры
   if (deltaTime > dropInterval) {
     moveDown(); // Функция для падения фигуры
+    context.fillStyle = "#000";
+  context.fillRect(0, 0, canvas.width, canvas.height);
+  drawGrid();
     lastTime = time;
   }
   // interval = setInterval(moveDown, 1000);
-  function moveDown() {
-    // двигаем текущую фигурку вниз
-    tetromino.y++;
-    // обновляем поле
-    update();
-  }
 
-  if (tetromino.collides()) {
-    
-    let gameOver = tetromino.lock();
-    if (gameOver) {
-      
-      createTetromino();
-      tetromino = new Tetromino(tetrominoFigur);
-    } else {
-      console.log(tetromino.grid);
-
-      return false;
-    }
-  }
   // Очистка фигуры на предыдущей позиции
-  context.fillStyle = "#000";
-  context.fillRect(0, 0, canvas.width, canvas.height);
-  drawGrid();
+  // context.fillStyle = "#000";
+  // context.fillRect(0, 0, canvas.width, canvas.height);
+  //drawGrid();
 
   // Обновление и отрисовка фигуры на новой позиции
-  // tetromino.update();
   tetromino.draw();
-
-  // Проверяем состояние клавиши и обновляем позицию фигуры только один раз при каждом нажатии
-  if (isKeyPressed) {
-    // Обновление позиции фигуры:
-    if (keyState.ArrowLeft) {
-      tetromino.move(-1);
-    }
-
-    if (keyState.ArrowRight) {
-      tetromino.move(+1);
-    }
-    if (keyState.ArrowUp) {
-      tetromino.rotate();
-    }
-    if (keyState.ArrowDown) {
-      tetromino.moveDown();
-      if (tetromino.collides()) {
-        isKeyPressed = false;
-      }
-    } else {
-    isKeyPressed = false;
-    }
-    
-  }
-  
-  
 
   //Запрос следующего кадра анимации
   requestAnimationFrame(update);
 }
 
 // Очистка холста при инициализации игры
-//   context.fillStyle = '#000';
-//   context.fillRect(0, 0, canvas.width, canvas.height);
+// context.fillStyle = '#000';
+// context.fillRect(0, 0, canvas.width, canvas.height);
 // Начало игры
+// drawGrid();
 createTetromino();
-let tetromino = new Tetromino(tetrominoFigur);
+let tetromino = new Tetromino(tetrominoRandom);
 
 update();
